@@ -1,6 +1,7 @@
 """Sequence and its related classes."""
 import copy
 import enum
+import torch
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
@@ -262,7 +263,7 @@ class SequenceGroupState:
     """Mutable state tied to a specific sequence group"""
 
     # torch.Generator used in seeded sampling
-    generator: Optional = None
+    generator: Optional[torch.Generator] = None
 
 
 class SequenceGroup:

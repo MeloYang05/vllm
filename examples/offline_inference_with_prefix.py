@@ -22,20 +22,20 @@ prompts = [
 sampling_params = SamplingParams(temperature=0.0)
 
 # Create an LLM.
-llm = LLM(model="facebook/opt-125m")
+llm = LLM(model="/home/meloyang/models/opt-125m", enable_prefix_caching=True)
 
 generating_prompts = [prefix + prompt for prompt in prompts]
 
 # Generate texts from the prompts. The output is a list of RequestOutput objects
 # that contain the prompt, generated text, and other information.
-outputs = llm.generate(generating_prompts, sampling_params)
-# Print the outputs.
-for output in outputs:
-    prompt = output.prompt
-    generated_text = output.outputs[0].text
-    print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
+# outputs = llm.generate(generating_prompts, sampling_params)
+# # Print the outputs.
+# for output in outputs:
+#     prompt = output.prompt
+#     generated_text = output.outputs[0].text
+#     print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
 
-print("-" * 80)
+# print("-" * 80)
 
 # The llm.generate call will batch all prompts and send the batch at once if resources allow.
 # The prefix will only be cached after the first batch is processed, so we need to call generate once
