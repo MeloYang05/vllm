@@ -595,6 +595,8 @@ class ModelRunner:
                 print(f"Chunked Prefill batch size: {input_tokens.shape[0]}")
         else:
             print(f"Decode batch size: {input_tokens.shape[0]}")
+
+        iteration_start_time = time.time()
         hidden_states = model_executable(
             input_ids=input_tokens,
             positions=input_positions,
@@ -607,6 +609,10 @@ class ModelRunner:
             hidden_states=hidden_states,
             sampling_metadata=sampling_metadata,
         )
+        torch.cuda.synchronize()
+        iteration_end_time = time.time()
+        iteration_duration = iteration_end_time - iteration_start_time
+        print(f"Iteration Elapsed: {iteration_duration}s")
         return output
 
     @torch.inference_mode()
