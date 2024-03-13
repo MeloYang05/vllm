@@ -193,18 +193,11 @@ class BlockSpaceManager:
         if not self.enable_caching:
             return 0
         num_cached_blocks = 0
-        # According to the current implementation, blocks in the evictor
-        # will be moved to cached blocks if it matches a seq's logical
-        # block. Therefore, blocks in evictor will be counted as well.
-        num_evict_blocks = 0
-        num_prompt_blocks = len(seq.logical_token_blocks)
-        for logical_idx in range(num_prompt_blocks):
+        for logical_idx in len(seq.logical_token_blocks):
             block_hash = seq.hash_of_block(logical_idx)
             if block_hash in self.gpu_allocator.cached_blocks:
                 num_cached_blocks += 1
-            elif block_hash in self.gpu_allocator.evictor:
-                num_evict_blocks += 1
-        return num_cached_blocks + num_evict_blocks
+        return num_cached_blocks
 
     def allocate(self, seq_group: SequenceGroup) -> None:
         # NOTE: Here we assume that all sequences in the group have the same
