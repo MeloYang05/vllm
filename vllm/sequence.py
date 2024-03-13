@@ -1,6 +1,7 @@
 """Sequence and its related classes."""
 import copy
 import enum
+import torch
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union, TYPE_CHECKING
 
@@ -9,7 +10,6 @@ from vllm.sampling_params import SamplingParams
 from vllm.lora.request import LoRARequest
 
 if TYPE_CHECKING:
-    import torch
     from vllm.spec_decode.metrics import SpecDecodeWorkerMetrics
 
 
@@ -190,9 +190,16 @@ class Sequence:
         # Compute the number of tokens in the sequence
         # TODO: The current hashing function is O(L^2). We should optimize
         # this in the future.
-        num_tokens = self.num_hashed_tokens_of_block(logical_idx)
-        return hash(
-            (tuple(self.data.get_token_ids()[0:num_tokens]), self.lora_int_id))
+        logical_block = self.logical_token_blocks[logical_idx]
+        hash_value = logical_block.hash_value
+        if hash_value is None:
+            num_tokens = self.num_hashed_tokens_of_block(logical_idx)
+            hash_value = hash((tuple(self.data.get_token_ids()[0:num_tokens]),
+                               self.lora_int_id))
+            # Only when the logical block is full, store the hash value
+            if logical_block.is_full():
+                logical_block.hash_value = hash_value
+        return hash_value
 
     def num_hashed_tokens_of_block(self, logical_idx: int):
         return logical_idx * self.block_size + self.block_size
@@ -289,7 +296,7 @@ class SequenceGroupState:
     """Mutable state tied to a specific sequence group"""
 
     # torch.Generator used in seeded sampling
-    generator: Optional = None
+    generator: Optional[torch.Generator] = None
 
 
 class SequenceGroup:

@@ -172,6 +172,10 @@ class BlockSpaceManager:
         if self.block_sliding_window is not None:
             num_required_blocks = min(num_required_blocks,
                                       self.block_sliding_window)
+        # Check the number of blocks which have been cached
+        num_cached_blocks = self.get_num_cached_blocks(seq)
+        num_required_blocks -= num_cached_blocks
+
         num_free_gpu_blocks = self.gpu_allocator.get_num_free_blocks()
 
         # Use watermark to avoid frequent cache eviction.
@@ -182,6 +186,23 @@ class BlockSpaceManager:
             return AllocStatus.OK
         else:
             return AllocStatus.LATER
+
+    def get_num_cached_blocks(self, seq: Sequence) -> int:
+        if not self.enable_caching:
+            return 0
+        num_cached_blocks = 0
+        # According to the current implementation, blocks in the evictor
+        # will be moved to cached blocks if it matches a seq's logical
+        # block. Therefore, blocks in evictor will be counted as well.
+        num_evict_blocks = 0
+        num_prompt_blocks = len(seq.logical_token_blocks)
+        for logical_idx in range(num_prompt_blocks):
+            block_hash = seq.hash_of_block(logical_idx)
+            if block_hash in self.gpu_allocator.cached_blocks:
+                num_cached_blocks += 1
+            elif block_hash in self.gpu_allocator.evictor:
+                num_evict_blocks += 1
+        return num_cached_blocks + num_evict_blocks
 
     def allocate(self, seq_group: SequenceGroup) -> None:
         # NOTE: Here we assume that all sequences in the group have the same

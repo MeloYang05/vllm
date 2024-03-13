@@ -502,6 +502,13 @@ class LLMEngine:
             lora_request).eos_token_id
         seq = Sequence(seq_id, prompt, prompt_token_ids, block_size,
                        eos_token_id, lora_request)
+        (seq_tokens, _, prefix_offset, read_offset) = detokenize_incrementally(
+            self.get_tokenizer_for_seq(seq), prompt_token_ids, None,
+            sampling_params.skip_special_tokens,
+            sampling_params.spaces_between_special_tokens)
+        seq.tokens = seq_tokens
+        seq.prefix_offset = prefix_offset
+        seq.read_offset = read_offset
 
         # Defensive copy of SamplingParams, which are used by the sampler,
         # this doesn't deep-copy LogitsProcessor objects
