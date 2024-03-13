@@ -587,15 +587,15 @@ class ModelRunner:
             model_executable = self.graph_runners[graph_batch_size]
         else:
             model_executable = self.model
-        if input_metadata.is_prompt:
-            if input_metadata.block_tables.numel() == 0:
-                print(f"Normal Prefill batch size: {input_tokens.shape[0]}")
-            else:
-                print(f"Chunked Prefill batch size: {input_tokens.shape[0]}")
-        else:
-            print(f"Decode batch size: {input_tokens.shape[0]}")
+        # if input_metadata.is_prompt:
+        #     if input_metadata.block_tables.numel() == 0:
+        #         print(f"Normal Prefill batch size: {input_tokens.shape[0]}")
+        #     else:
+        #         print(f"Chunked Prefill batch size: {input_tokens.shape[0]}")
+        # else:
+        #     print(f"Decode batch size: {input_tokens.shape[0]}")
 
-        iteration_start_time = time.time()
+        # iteration_start_time = time.time()
         hidden_states = model_executable(
             input_ids=input_tokens,
             positions=input_positions,
@@ -609,9 +609,9 @@ class ModelRunner:
             sampling_metadata=sampling_metadata,
         )
         torch.cuda.synchronize()
-        iteration_end_time = time.time()
-        iteration_duration = iteration_end_time - iteration_start_time
-        print(f"Iteration Elapsed: {iteration_duration}s")
+        # iteration_end_time = time.time()
+        # iteration_duration = iteration_end_time - iteration_start_time
+        # print(f"Iteration Elapsed: {iteration_duration}s")
         return output
 
     @torch.inference_mode()
