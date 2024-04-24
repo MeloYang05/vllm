@@ -252,18 +252,18 @@ class Scheduler:
                 # If the number of batched tokens exceeds the limit, stop.
                 new_seq_lens = seq_lens + [num_prompt_tokens]
                 num_batched_tokens = len(new_seq_lens) * max(new_seq_lens)
-                if num_batched_tokens > self.scheduler_config.max_num_batched_tokens:
-                    break
+                # if num_batched_tokens > self.scheduler_config.max_num_batched_tokens:
+                #     break
 
                 # The total number of sequences in the RUNNING state should not
                 # exceed the maximum number of sequences.
                 num_new_seqs = seq_group.get_max_num_running_seqs()
-                if num_curr_seqs + num_new_seqs > self.scheduler_config.max_num_seqs:
-                    break
+                # if num_curr_seqs + num_new_seqs > self.scheduler_config.max_num_seqs:
+                #     break
 
                 num_paddings = num_batched_tokens - sum(new_seq_lens)
-                if num_paddings > self.scheduler_config.max_paddings:
-                    break
+                # if num_paddings > self.scheduler_config.max_paddings:
+                #     break
                 seq_lens = new_seq_lens
 
                 if lora_int_id > 0:
