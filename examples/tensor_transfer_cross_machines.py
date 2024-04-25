@@ -57,8 +57,11 @@ send_revc_tensor((3, 3))
 
 # Real Test
 for tokens_num in [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]:
-    tensor, elapsed = send_revc_tensor((tokens_num, 80, 8192))
-    torch.cuda.synchronize()
+    total_elapsed = 0
+    for i in range(80):
+        tensor, elapsed = send_revc_tensor((tokens_num, 8192))
+        total_elapsed += elapsed
+        torch.cuda.synchronize()
 
     # if dist.get_rank() == 0:
     #     print("Send data on source GPU:")
@@ -69,4 +72,4 @@ for tokens_num in [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]:
     #     print("Received data on destination GPU:")
     #     print(tensor)
 
-    print(f"Tokens Num: {tokens_num}, Transfer Time: {elapsed}")
+    print(f"Tokens Num: {tokens_num}, Transfer Time: {total_elapsed}")
