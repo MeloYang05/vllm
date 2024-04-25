@@ -56,18 +56,17 @@ dist.init_process_group(
 send_revc_tensor((3, 3))
 
 # Real Test
-tokens_num = 8192
-tensor, elapsed = send_revc_tensor((tokens_num, 80, 8192))
-torch.cuda.synchronize()
+for tokens_num in [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]:
+    tensor, elapsed = send_revc_tensor((tokens_num, 80, 8192))
+    torch.cuda.synchronize()
 
+    # if dist.get_rank() == 0:
+    #     print("Send data on source GPU:")
+    #     print(tensor)
 
-if dist.get_rank() == 0:
-    print("Send data on source GPU:")
-    print(tensor)
+    # # Print the received data on the destination GPU
+    # if dist.get_rank() != 0:  # Assuming process with rank 0 is on the source machine
+    #     print("Received data on destination GPU:")
+    #     print(tensor)
 
-# Print the received data on the destination GPU
-if dist.get_rank() != 0:  # Assuming process with rank 0 is on the source machine
-    print("Received data on destination GPU:")
-    print(tensor)
-
-print(f"Elapsed: {elapsed}")
+    print(f"Tokens Num: {tokens_num}, Transfer Time: {elapsed}")
